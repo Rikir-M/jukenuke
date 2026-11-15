@@ -1,0 +1,25 @@
+{
+    "name": "jukenuke",
+    "version": "1.0.0",
+    "private": true,
+    "license": "MIT",
+    "engines": {
+        "node": ">=20"
+    },
+    "description": "Bluetooth jukenuke: a web UI and song queue, played through mpv",
+    "main": "server.js",
+    "scripts": {
+        "start": "node server.js",
+        "dev": "node --watch server.js",
+        "dev:fake": "node --watch server.js --fake",
+        "reload": "browser-sync start --proxy localhost:3000 --port 3001 --files \"public/**/*\" --no-notify --no-open --no-ui",
+        "test": "node --test"
+    },
+    "dependencies": {
+        "express": "^5.1.0"
+    },
+    "devDependencies": {
+        "browser-sync": "^3.0.4",
+        "jsdom": "^26.0.0"
+    }
+}

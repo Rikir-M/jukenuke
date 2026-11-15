@@ -1,0 +1,111 @@
+/* Mobile */
+
+@media (max-width: 480px) {
+    body {
+        padding: 13px 10px 60px;
+    }
+
+    header {
+        align-items: flex-start;
+    }
+
+    .wordmark {
+        font-size: 2.8rem;
+    }
+
+    .on-air {
+        margin-top: 4px;
+        padding: 6px 7px;
+        font-size: 0.55rem;
+    }
+
+    .deck {
+        padding: 25px 13px 15px;
+    }
+
+    .platter-row {
+        gap: 15px;
+    }
+
+    .vinyl-holder {
+        width: 125px;
+        height: 125px;
+    }
+
+    .platter {
+        width: 125px;
+        height: 125px;
+    }
+
+    .tonearm {
+        width: 52px;
+        height: 52px;
+
+        top: -9px;
+        right: -9px;
+    }
+
+    .np-title {
+        font-size: 1.45rem;
+    }
+
+    .np-eyebrow {
+        font-size: 0.54rem;
+    }
+
+    .deck-controls {
+        gap: 8px;
+    }
+
+    .control-btn {
+        min-height: 58px;
+        padding: 10px 6px 8px;
+
+        font-size: 0.55rem;
+    }
+
+    .control-icon,
+    .control-icon svg {
+        width: 17px;
+        height: 17px;
+    }
+
+    .join-card {
+        align-items: flex-start;
+    }
+
+    #qrcode {
+        width: 88px;
+        height: 88px;
+    }
+}
+
+@media (max-width: 350px) {
+    .platter-row {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .vinyl-holder {
+        margin: 0 auto;
+    }
+
+    .np-info {
+        width: 100%;
+    }
+
+    .control-btn {
+        gap: 4px;
+        font-size: 0.52rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+    }
+}

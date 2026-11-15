@@ -1,0 +1,85 @@
+/* Setlist */
+
+.setlist-row {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+
+    padding: 12px 0;
+
+    border-bottom: 2px dashed #4a4048;
+}
+
+.setlist-row:last-child {
+    border-bottom: none;
+}
+
+.track-no {
+    width: 30px;
+
+    flex-shrink: 0;
+
+    font-family: var(--display);
+    font-size: 1.2rem;
+
+    color: var(--orange);
+
+    text-align: center;
+}
+
+.track-meta {
+    min-width: 0;
+    flex: 1;
+}
+
+.track-title {
+    font-family: var(--body);
+    font-size: 0.85rem;
+    font-weight: 700;
+
+    color: var(--paper-light);
+
+    word-break: break-word;
+}
+
+.track-by {
+    margin-top: 3px;
+
+    font-family: var(--mono);
+    font-size: 0.61rem;
+
+    color: var(--muted);
+}
+
+.remove-btn {
+    width: 30px;
+    height: 30px;
+
+    padding: 0;
+
+    color: var(--muted);
+    background: transparent;
+
+    border: 2px solid transparent;
+    border-radius: 4px;
+
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.remove-btn:hover {
+    color: var(--pink);
+
+    border-color: var(--pink);
+    background: rgba(255, 63, 129, 0.08);
+}
+
+.empty-state {
+    padding: 8px 0;
+
+    font-family: var(--mono);
+    font-size: 0.7rem;
+
+    color: var(--muted);
+}

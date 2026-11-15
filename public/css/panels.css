@@ -1,0 +1,109 @@
+/* Generic Comic Panel */
+
+.card,
+.deck {
+    position: relative;
+
+    background:
+        radial-gradient(
+            circle,
+            rgba(255, 255, 255, 0.035) 1px,
+            transparent 1.5px
+        ),
+        var(--panel);
+
+    background-size: 7px 7px;
+
+    border: 3px solid var(--border);
+    border-radius: 9px;
+
+    box-shadow:
+        5px 5px 0 var(--border),
+        0 12px 30px rgba(0, 0, 0, 0.25);
+
+    overflow: hidden;
+}
+
+.card {
+    padding: 18px;
+    margin-bottom: 20px;
+}
+
+.card::before,
+.deck::before {
+    content: "";
+
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+
+    height: 6px;
+
+    background: repeating-linear-gradient(
+        135deg,
+        var(--orange) 0 12px,
+        var(--yellow) 12px 24px,
+        var(--pink) 24px 36px,
+        var(--cyan) 36px 48px
+    );
+}
+
+.card-label {
+    display: inline-block;
+
+    margin-bottom: 13px;
+    padding: 3px 8px;
+
+    font-family: var(--display);
+    font-size: 1.05rem;
+    letter-spacing: 0.04em;
+
+    color: var(--ink);
+    background: var(--yellow);
+
+    border: 2px solid var(--border);
+
+    transform: rotate(-1deg);
+
+    box-shadow: 2px 2px 0 var(--border);
+}
+
+/* Player Deck */
+
+.deck {
+    padding: 28px 18px 18px;
+    margin-bottom: 20px;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255, 122, 26, 0.08),
+            transparent 45%
+        ),
+        var(--panel);
+}
+
+.deck::after {
+    content: "FM • 88.8";
+
+    position: absolute;
+    right: 12px;
+    bottom: 8px;
+
+    font-family: var(--mono);
+    font-size: 0.55rem;
+    letter-spacing: 0.08em;
+
+    color: rgba(255, 212, 71, 0.35);
+
+    transform: rotate(-4deg);
+}
+
+.platter-row {
+    display: flex;
+    align-items: center;
+    gap: 22px;
+
+    position: relative;
+}

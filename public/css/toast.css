@@ -1,0 +1,40 @@
+/* Toast */
+
+.toast {
+    position: fixed;
+
+    left: 50%;
+    bottom: 18px;
+
+    z-index: 20;
+
+    max-width: calc(100vw - 30px);
+
+    padding: 10px 15px;
+
+    transform: translate(-50%, 15px) rotate(-1deg);
+
+    background: var(--yellow);
+    color: var(--ink);
+
+    border: 3px solid var(--border);
+    border-radius: 4px;
+
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    font-weight: 600;
+
+    box-shadow: 4px 4px 0 var(--pink);
+
+    opacity: 0;
+    pointer-events: none;
+
+    transition:
+        opacity 0.2s,
+        transform 0.2s;
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translate(-50%, 0) rotate(-1deg);
+}

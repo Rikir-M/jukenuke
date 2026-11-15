@@ -1,0 +1,26 @@
+node_modules/
+data/
+
+# Local settings and credentials
+.env
+.env.*
+!.env.example
+.npmrc
+.aws/
+*.pem
+*.key
+
+# Logs, coverage and editor/OS files
+*.log
+coverage/
+.nyc_output/
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+.codex/
+
+# Local animation source experiments (the app uses public/)
+/astronya-loading.html
+/astronya-searching.html
+/make_searching.py

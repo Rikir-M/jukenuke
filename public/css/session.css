@@ -1,0 +1,110 @@
+/* Shutdown Card */
+
+.danger-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(239, 61, 61, 0.12),
+            transparent
+        ),
+        var(--panel);
+}
+
+.danger-title {
+    margin-bottom: 3px;
+
+    font-family: var(--display);
+    font-size: 1.15rem;
+    letter-spacing: 0.04em;
+
+    color: var(--red);
+}
+
+.danger-description {
+    margin: 0;
+
+    color: var(--muted);
+
+    font-size: 0.66rem;
+    line-height: 1.45;
+}
+
+.danger-btn {
+    flex-shrink: 0;
+
+    color: var(--paper-light);
+    background: var(--red);
+    border-color: var(--border);
+}
+
+.danger-btn:hover {
+    background: var(--pink);
+}
+
+/* Join / QR */
+
+/* .join-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+#qrcode {
+    width: 100px;
+    height: 100px;
+
+    flex-shrink: 0;
+
+    padding: 7px;
+
+    background: var(--paper-light);
+
+    border: 3px solid var(--border);
+    border-radius: 4px;
+
+    box-shadow: 3px 3px 0 var(--cyan);
+
+    line-height: 0;
+}
+
+#qrcode img {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+.join-text {
+    min-width: 0;
+}
+
+.join-title {
+    font-family: var(--display);
+    font-size: 1.35rem;
+    letter-spacing: 0.04em;
+
+    color: var(--yellow);
+}
+
+.join-url {
+    margin-top: 4px;
+
+    font-family: var(--mono);
+    font-size: 0.64rem;
+
+    color: var(--cyan);
+
+    word-break: break-all;
+}
+
+.join-text p {
+    margin: 7px 0 0;
+
+    color: var(--muted);
+
+    font-size: 0.65rem;
+    line-height: 1.4;
+} */

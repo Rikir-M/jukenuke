@@ -1,0 +1,499 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+        <title>JukeNuke — Cosmic Jukenuke</title>
+
+        <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+        <link
+            href="https://fonts.googleapis.com/css2?family=Bangers&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700;800&display=swap"
+            rel="stylesheet"
+        />
+        <link rel="stylesheet" href="css/base.css" />
+        <link rel="stylesheet" href="css/header.css" />
+        <link rel="stylesheet" href="css/panels.css" />
+        <link rel="stylesheet" href="css/player.css" />
+        <link rel="stylesheet" href="css/controls.css" />
+        <link rel="stylesheet" href="css/forms.css" />
+        <link rel="stylesheet" href="css/setlist.css" />
+        <link rel="stylesheet" href="css/session.css" />
+        <link rel="stylesheet" href="css/decor.css" />
+        <link rel="stylesheet" href="css/toast.css" />
+        <link rel="stylesheet" href="css/responsive.css" />
+        <link rel="stylesheet" href="css/dev-badge.css" />
+        <link rel="stylesheet" href="css/searching.css" />
+    </head>
+
+    <body>
+        <div class="wrap">
+            <!-- HEADER -->
+            <header>
+                <div class="brand">
+                    <div class="wordmark">Juke<span>Nuke</span></div>
+                    <div class="card-label beta-tag">BETA</div>
+
+                    <div class="tagline">// cosmic sound system //</div>
+                </div>
+
+                <div class="on-air" id="on-air">
+                    <span class="dot"></span>
+                    <span id="on-air-text">OFF AIR</span>
+                </div>
+            </header>
+
+            <div class="comic-lines"></div>
+
+            <!-- PLAYER -->
+            <div class="deck">
+                <div class="platter-row">
+                    <div class="vinyl-holder">
+                        <div class="platter" id="platter">
+                            <div class="label">
+                                <img
+                                    class="label-art"
+                                    id="platter-art"
+                                    alt=""
+                                />
+                            </div>
+                        </div>
+
+                        <div class="tonearm" id="tonearm">
+                            <svg viewBox="0 0 60 60">
+                                <path
+                                    d="M52 8 L18 46"
+                                    stroke="#d6c9b7"
+                                    stroke-width="4"
+                                    stroke-linecap="round"
+                                />
+
+                                <circle
+                                    cx="52"
+                                    cy="8"
+                                    r="7"
+                                    fill="#ff7a1a"
+                                    stroke="#120f14"
+                                    stroke-width="2"
+                                />
+
+                                <circle
+                                    cx="18"
+                                    cy="46"
+                                    r="4"
+                                    fill="#36d9d1"
+                                    stroke="#120f14"
+                                    stroke-width="2"
+                                />
+                            </svg>
+                        </div>
+                    </div>
+
+                    <div class="np-info">
+                        <div class="np-eyebrow" id="np-eyebrow">
+                            NOT SPINNING
+                        </div>
+
+                        <div class="np-title" id="np-title">QUEUE IS EMPTY</div>
+
+                        <div class="np-by" id="np-by">requested by someone</div>
+
+                        <div class="">
+                            <!-- <div class="bars" id="bars" style="visibility: hidden"> -->
+                            <div class="bars" id="bars">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                            <div class="reactions" id="reactions"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VOLUME -->
+                <div class="volume-row">
+                    <span
+                        class="volume-icon"
+                        id="volume-icon"
+                        aria-hidden="true"
+                    >
+                        <svg viewBox="0 0 24 24" fill="none">
+                            <path
+                                d="M4 10v4h4l5 4V6l-5 4H4Z"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linejoin="round"
+                            />
+
+                            <path
+                                d="M16 9c1 1 1 5 0 6"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                            />
+
+                            <path
+                                d="M19 6c2 2 2 10 0 12"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                            />
+                        </svg>
+                    </span>
+
+                    <input
+                        type="range"
+                        id="volume-slider"
+                        min="0"
+                        max="100"
+                        value="80"
+                    />
+
+                    <span class="volume-value" id="volume-value"> 80 </span>
+                </div>
+
+                <!-- PLAYER CONTROLS -->
+                <div class="deck-controls">
+                    <button class="control-btn" id="stop-btn">
+                        <span class="btn-led" aria-hidden="true"></span>
+
+                        <span class="control-icon">
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <rect
+                                    x="5"
+                                    y="5"
+                                    width="14"
+                                    height="14"
+                                    rx="1"
+                                ></rect>
+                            </svg>
+                        </span>
+
+                        <span>Stop</span>
+                    </button>
+
+                    <button
+                        class="control-btn"
+                        id="pause-btn"
+                        data-paused="false"
+                    >
+                        <span class="btn-led" aria-hidden="true"></span>
+
+                        <span class="control-icon" id="pause-icon">
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <rect
+                                    x="6"
+                                    y="4"
+                                    width="4"
+                                    height="16"
+                                    rx="1"
+                                ></rect>
+
+                                <rect
+                                    x="14"
+                                    y="4"
+                                    width="4"
+                                    height="16"
+                                    rx="1"
+                                ></rect>
+                            </svg>
+                        </span>
+
+                        <span id="pause-btn-text"> Pause </span>
+                    </button>
+
+                    <button class="control-btn" id="skip-btn">
+                        <span class="btn-led" aria-hidden="true"></span>
+
+                        <span class="control-icon">
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M5 5v14l9-7-9-7Z"></path>
+                                <path d="M16 5v14"></path>
+                            </svg>
+                        </span>
+
+                        <span>Skip</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- REQUEST -->
+            <div class="card">
+                <div class="card-label">TRANSMIT A TRACK</div>
+
+                <form id="add-form">
+                    <input
+                        id="song-input"
+                        type="text"
+                        placeholder="YouTube link / title / artist"
+                        required
+                    />
+
+                    <input
+                        id="name-input"
+                        type="text"
+                        placeholder="Your name"
+                    />
+
+                    <button class="btn btn-amber" type="submit" id="add-btn">
+                        <span id="add-btn-text">ADD TO SETLIST</span>
+                    </button>
+                </form>
+            </div>
+
+            <!-- SETLIST -->
+            <div class="card">
+                <div class="card-label">SETLIST</div>
+
+                <div id="queue-list">
+                    <div class="empty-state">NOTHING QUEUED — BE THE FIRST</div>
+                </div>
+            </div>
+
+            <!-- END SESSION -->
+            <div class="card danger-card">
+                <div>
+                    <div class="danger-title">END TRANSMISSION</div>
+
+                    <p class="danger-description">
+                        Shuts the JukeNuke server down for everyone. Restart it
+                        from the player phone.
+                    </p>
+                </div>
+
+                <button class="btn danger-btn" id="shutdown-btn">END</button>
+            </div>
+
+            <!-- JOIN -->
+            <!-- <div class="card join-card">
+                <div id="qrcode"></div>
+
+                <div class="join-text">
+                    <div class="join-title">SCAN TO JOIN</div>
+
+                    <div class="join-url" id="join-url"></div>
+
+                    <p>
+                        Everyone connected to this WiFi can transmit a track to
+                        the JukeNuke.
+                    </p>
+                </div>
+            </div> -->
+
+            <div class="footer-mark">
+                JUKE<span>NUKE</span> · all requests welcome ·
+                <span>keep the record spinning</span>
+            </div>
+        </div>
+
+        <div
+            class="song-search"
+            id="song-search"
+            hidden
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="song-search-label"
+            tabindex="-1"
+        >
+            <div class="song-search-content" role="status" aria-live="polite">
+                <div class="song-search-mascot" aria-hidden="true">
+                    <svg
+                        width="80"
+                        height="128"
+                        viewBox="-12 -5 130 172"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                        xmlns:xlink="http://www.w3.org/1999/xlink"
+                    >
+                        <use xlink:href="#stroke0_32_302" fill="black" />
+                        <mask id="stroke1_32_302" fill="white">
+                            <use xlink:href="#stroke0_32_302" />
+                        </mask>
+                        <path
+                            d="M25.75 157.06H72.5378C74.5799 157.06 76.0252 155.064 75.3879 153.124L51.994 81.907C51.0901 79.1554 47.1976 79.1554 46.2937 81.907L22.8998 153.124C22.2625 155.064 23.7078 157.06 25.75 157.06Z"
+                            stroke-width="2"
+                            stroke="black"
+                            mask="url(#stroke1_32_302)"
+                        />
+                        <use xlink:href="#stroke2_32_302" fill="#4B98F0" />
+                        <mask id="stroke3_32_302" fill="white">
+                            <use xlink:href="#stroke2_32_302" />
+                        </mask>
+                        <path
+                            d="M40.5879 88.6473H57.7026C58.1614 88.6473 58.5606 88.335 58.6336 87.8821C58.7671 87.0549 58.8963 85.7189 58.578 84.7029C58.5237 84.5298 58.4104 84.385 58.2545 84.2921C55.0627 82.3878 43.2016 82.3906 40.0353 84.3004C39.8884 84.389 39.78 84.5233 39.7241 84.6854C39.3724 85.7049 39.5166 87.0653 39.6619 87.8976C39.7398 88.3435 40.1353 88.6473 40.5879 88.6473Z"
+                            stroke="black"
+                            mask="url(#stroke3_32_302)"
+                        />
+                        <path
+                            d="M96.3538 121.291C96.3538 119.113 96.4626 117.137 94.2627 116.087C91.5211 114.779 88.388 116.518 86.6539 118.071C85.7557 118.875 81.4567 122.372 80.8549 127.641C80.4274 131.383 79.5846 137.096 79.0109 138.752C78.3054 140.789 76.4801 145.955 71.3025 146.461"
+                            stroke-width="3"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke="black"
+                        />
+                        <use xlink:href="#stroke4_32_302" fill="white" />
+                        <mask
+                            id="stroke5_32_302"
+                            maskUnits="userSpaceOnUse"
+                            x="0.928345"
+                            y="2.85423"
+                            width="99"
+                            height="89"
+                            fill="black"
+                        >
+                            <rect
+                                fill="white"
+                                x="0.928345"
+                                y="2.85423"
+                                width="99"
+                                height="89"
+                            />
+                            <use xlink:href="#stroke4_32_302" />
+                        </mask>
+                        <path
+                            d="M98.2831 47.2144C98.2831 71.1615 76.7134 90.5745 50.1057 90.5745C23.4981 90.5745 1.92834 71.1615 1.92834 47.2144C1.92834 23.2672 23.4981 3.85423 50.1057 3.85423C76.7134 3.85423 98.2831 23.2672 98.2831 47.2144Z"
+                            stroke-width="2"
+                            stroke="black"
+                            mask="url(#stroke5_32_302)"
+                        />
+                        <ellipse
+                            cx="50.1057"
+                            cy="47.2144"
+                            rx="48.1774"
+                            ry="43.3601"
+                            fill="white"
+                        />
+                        <use xlink:href="#stroke6_32_302" fill="black" />
+                        <mask id="stroke7_32_302" fill="white">
+                            <use xlink:href="#stroke6_32_302" />
+                        </mask>
+                        <path
+                            d="M15.5754 38.1926C23.5421 20.6979 74.8724 20.6471 82.7257 38.1926C87.75 49.4179 88.3143 59.162 82.8081 70.4874C82.7543 70.598 82.6825 70.6965 82.5912 70.779C70.4247 81.7671 31.5211 81.7383 15.7794 70.7993C15.6426 70.7043 15.5359 70.576 15.4633 70.4261C9.98813 59.1258 10.5094 49.3175 15.5754 38.1926Z"
+                            stroke-width="2"
+                            stroke="black"
+                            mask="url(#stroke7_32_302)"
+                        />
+                        <use xlink:href="#stroke8_32_302" fill="black" />
+                        <mask id="stroke9_32_302" fill="white">
+                            <use xlink:href="#stroke8_32_302" />
+                        </mask>
+                        <path
+                            d="M88.6334 25.3584L87.6403 25.2414L88.6334 25.3584ZM90.4524 9.91866L89.4593 9.80165L90.4524 9.91866ZM90.4524 9.91866L89.4593 9.80165L87.6403 25.2414L88.6334 25.3584L89.6265 25.4754L91.4455 10.0357L90.4524 9.91866ZM86.9677 25.9815L87.6403 25.2414L74.2633 13.0836L73.5907 13.8237L72.9181 14.5637L86.2951 26.7215L86.9677 25.9815ZM74.0522 12.1062L74.2633 13.0836L89.4593 9.80165L89.2482 8.82418L89.0371 7.84671L73.8411 11.1287L74.0522 12.1062ZM73.5907 13.8237L74.2633 13.0836V13.0836L74.0522 12.1062L73.8411 11.1287C72.2509 11.4721 71.7142 13.4695 72.9181 14.5637L73.5907 13.8237ZM88.6334 25.3584L87.6403 25.2414L87.6403 25.2414L86.9677 25.9815L86.2951 26.7215C87.499 27.8157 89.4361 27.0912 89.6265 25.4754L88.6334 25.3584ZM90.4524 9.91866L91.4455 10.0357C91.6061 8.67303 90.3782 7.55706 89.0371 7.84671L89.2482 8.82418L89.4593 9.80165L89.4593 9.80165L90.4524 9.91866Z"
+                            fill="black"
+                            mask="url(#stroke9_32_302)"
+                        />
+                        <use xlink:href="#stroke10_32_302" fill="black" />
+                        <mask id="stroke11_32_302" fill="white">
+                            <use xlink:href="#stroke10_32_302" />
+                        </mask>
+                        <path
+                            d="M11.3669 25.3584L12.36 25.2414L11.3669 25.3584ZM9.54783 9.91866L10.541 9.80165L9.54783 9.91866ZM9.54783 9.91866L10.541 9.80165L12.36 25.2414L11.3669 25.3584L10.3737 25.4754L8.5547 10.0357L9.54783 9.91866ZM13.0326 25.9815L12.36 25.2414L25.737 13.0836L26.4095 13.8237L27.0821 14.5637L13.7051 26.7215L13.0326 25.9815ZM25.9481 12.1062L25.737 13.0836L10.541 9.80165L10.7521 8.82418L10.9632 7.84671L26.1592 11.1287L25.9481 12.1062ZM26.4095 13.8237L25.737 13.0836V13.0836L25.9481 12.1062L26.1592 11.1287C27.7494 11.4721 28.286 13.4695 27.0821 14.5637L26.4095 13.8237ZM11.3669 25.3584L12.36 25.2414L12.36 25.2414L13.0326 25.9815L13.7051 26.7215C12.5012 27.8157 10.5641 27.0912 10.3737 25.4754L11.3669 25.3584ZM9.54783 9.91866L8.5547 10.0357C8.39417 8.67303 9.62205 7.55706 10.9632 7.84671L10.7521 8.82418L10.541 9.80165L10.541 9.80165L9.54783 9.91866Z"
+                            fill="black"
+                            mask="url(#stroke11_32_302)"
+                        />
+                        <use xlink:href="#stroke12_32_302" fill="white" />
+                        <mask id="stroke13_32_302" fill="white">
+                            <use xlink:href="#stroke12_32_302" />
+                        </mask>
+                        <path
+                            d="M37.863 95.3923H61.259C61.7417 95.3923 62.154 95.048 62.22 94.5697C62.4201 93.1207 62.7295 90.0638 62.1606 87.9222C62.1187 87.7646 62.0373 87.6253 61.915 87.5175C57.7933 83.8824 41.3114 83.8851 37.2083 87.5256C37.0922 87.6286 37.0134 87.7596 36.9702 87.9088C36.3518 90.0441 36.6895 93.1304 36.905 94.581C36.9753 95.0539 37.385 95.3923 37.863 95.3923Z"
+                            stroke-width="2"
+                            stroke="black"
+                            mask="url(#stroke13_32_302)"
+                        />
+                        <ellipse
+                            cx="39.5081"
+                            cy="68.4126"
+                            rx="2.89064"
+                            ry="4.81779"
+                            fill="#4B98F0"
+                        />
+                        <ellipse
+                            cx="39.5084"
+                            cy="68.4126"
+                            rx="0.481774"
+                            ry="2.89068"
+                            fill="black"
+                        />
+                        <ellipse
+                            cx="58.7768"
+                            cy="68.4126"
+                            rx="2.89064"
+                            ry="4.81779"
+                            fill="#4B98F0"
+                        />
+                        <ellipse
+                            cx="58.778"
+                            cy="68.4126"
+                            rx="0.481774"
+                            ry="2.89068"
+                            fill="black"
+                        />
+                        <defs>
+                            <path
+                                id="stroke0_32_302"
+                                d="M46.2937 81.907C47.1976 79.1554 51.0901 79.1554 51.994 81.907L75.3879 153.124C76.0252 155.064 74.5799 157.06 72.5378 157.06H25.75C23.7078 157.06 22.2625 155.064 22.8998 153.124L46.2937 81.907Z"
+                            />
+                            <path
+                                id="stroke2_32_302"
+                                d="M39.7241 84.6854C39.78 84.5233 39.8884 84.389 40.0353 84.3004C43.2016 82.3906 55.0627 82.3878 58.2545 84.2921C58.4104 84.385 58.5237 84.5298 58.578 84.7029C58.8963 85.7189 58.7671 87.0549 58.6336 87.8821C58.5606 88.335 58.1614 88.6473 57.7026 88.6473H40.5879C40.1353 88.6473 39.7398 88.3435 39.6619 87.8976C39.5166 87.0653 39.3724 85.7049 39.7241 84.6854Z"
+                            />
+                            <path
+                                id="stroke4_32_302"
+                                d="M98.2831 47.2144C98.2831 71.1615 76.7134 90.5745 50.1057 90.5745C23.4981 90.5745 1.92834 71.1615 1.92834 47.2144C1.92834 23.2672 23.4981 3.85423 50.1057 3.85423C76.7134 3.85423 98.2831 23.2672 98.2831 47.2144Z"
+                            />
+                            <path
+                                id="stroke6_32_302"
+                                d="M15.5754 38.1926C23.5421 20.6979 74.8724 20.6471 82.7257 38.1926C87.75 49.4179 88.3143 59.162 82.8081 70.4874C82.7543 70.598 82.6825 70.6965 82.5912 70.779C70.4247 81.7671 31.5211 81.7383 15.7794 70.7993C15.6426 70.7043 15.5359 70.576 15.4633 70.4261C9.98813 59.1258 10.5094 49.3175 15.5754 38.1926Z"
+                            />
+                            <path
+                                id="stroke8_32_302"
+                                d="M89.2482 8.82418C89.9187 8.67935 90.5327 9.23734 90.4524 9.91866L88.6334 25.3584C88.5382 26.1663 87.5697 26.5286 86.9677 25.9815L73.5907 13.8237C72.9887 13.2766 73.2571 12.2779 74.0522 12.1062L89.2482 8.82418Z"
+                            />
+                            <path
+                                id="stroke10_32_302"
+                                d="M10.7521 8.82418C10.0815 8.67935 9.46756 9.23734 9.54783 9.91866L11.3669 25.3584C11.462 26.1663 12.4306 26.5286 13.0326 25.9815L26.4095 13.8237C27.0115 13.2766 26.7432 12.2779 25.9481 12.1062L10.7521 8.82418Z"
+                            />
+                            <path
+                                id="stroke12_32_302"
+                                d="M36.9702 87.9088C37.0134 87.7596 37.0922 87.6286 37.2083 87.5256C41.3114 83.8851 57.7933 83.8824 61.915 87.5175C62.0373 87.6253 62.1187 87.7646 62.1606 87.9222C62.7295 90.0638 62.4201 93.1207 62.22 94.5697C62.154 95.048 61.7417 95.3923 61.259 95.3923H37.863C37.385 95.3923 36.9753 95.0539 36.905 94.581C36.6895 93.1304 36.3518 90.0441 36.9702 87.9088Z"
+                            />
+                        </defs>
+                    </svg>
+                </div>
+                <div class="song-search-shadow" aria-hidden="true"></div>
+                <div class="song-search-status">
+                    <span id="song-search-label">Searching song</span>
+                    <span class="song-search-dots" aria-hidden="true"
+                        ><i></i><i></i><i></i
+                    ></span>
+                </div>
+                <p>Finding your next track on YouTube</p>
+            </div>
+        </div>
+
+        <div class="toast" id="toast"></div>
+
+        <!-- Order matters: later scripts use what earlier ones define. -->
+        <script src="js/dom.js"></script>
+        <script src="js/util.js"></script>
+        <script src="js/pin.js"></script>
+        <script src="js/volume.js"></script>
+        <script src="js/pause.js"></script>
+        <script src="js/reactions.js"></script>
+        <script src="js/now-playing.js"></script>
+        <script src="js/queue.js"></script>
+        <script src="js/searching.js"></script>
+        <script src="js/request-form.js"></script>
+        <script src="js/controls.js"></script>
+        <script src="js/dev-badge.js"></script>
+        <script src="js/state.js"></script>
+        <script src="js/main.js"></script>
+    </body>
+</html>

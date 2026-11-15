@@ -1,0 +1,112 @@
+/* Header */
+
+header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 18px;
+}
+
+.brand {
+    position: relative;
+}
+
+.wordmark {
+    font-family: var(--display);
+    font-size: clamp(2.5rem, 11vw, 4.2rem);
+    line-height: 0.82;
+    letter-spacing: 0.02em;
+
+    color: var(--yellow);
+
+    -webkit-text-stroke: 2px var(--border);
+
+    text-shadow:
+        4px 4px 0 var(--pink),
+        7px 7px 0 var(--border);
+
+    transform: rotate(-2deg);
+}
+
+.wordmark span {
+    color: var(--orange);
+}
+
+.card-label.beta-tag {
+    position: absolute;
+    top: -20px;
+    right: -40px;
+    transform: rotate(20deg);
+}
+
+.tagline {
+    margin-top: 8px;
+    margin-left: 5px;
+
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+
+    color: var(--cyan);
+}
+
+/* On-Air Badge */
+
+.on-air {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+
+    padding: 7px 10px;
+
+    background: var(--panel);
+    border: 3px solid var(--border);
+    border-radius: 5px;
+
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+
+    color: var(--muted);
+
+    box-shadow: 3px 3px 0 var(--border);
+
+    transform: rotate(2deg);
+}
+
+.on-air .dot {
+    width: 8px;
+    height: 8px;
+
+    border-radius: 50%;
+    background: var(--muted);
+}
+
+.on-air.live {
+    color: var(--yellow);
+    background: var(--red);
+}
+
+.on-air.live .dot {
+    background: var(--yellow);
+    animation: live-pulse 1.2s infinite;
+}
+
+@keyframes live-pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(255, 212, 71, 0.8);
+    }
+
+    70% {
+        box-shadow: 0 0 0 8px rgba(255, 212, 71, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(255, 212, 71, 0);
+    }
+}
