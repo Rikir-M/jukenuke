@@ -1,6 +1,6 @@
 # JukeNuke
 
-A Bluetooth jukenuke. One device (the "player" — a spare phone or a PC) runs
+A Bluetooth jukebox. One device (the "player" — a spare phone or a PC) runs
 this server and plays music through its speaker; everyone else opens the page
 in their browser, queues songs from YouTube, and reacts to what's playing.
 
@@ -142,18 +142,6 @@ automatically load `.env` files. Never commit your real configuration or PIN.
   and list them in `index.html`, after the files they depend on.
 - **The scan-to-join QR code** is switched off: its pieces are commented out in
   `index.html`, `css/session.css`, and kept in `js/qr.js` (which isn't loaded).
-
-## Contributing and checks
-
-See [CONTRIBUTING.md](CONTRIBUTING.md). Run `npm test` for API and browser-DOM
-tests; they use fake mode and need no audio tools. GitHub Actions runs these
-checks on Windows and Linux with Node.js 22. Real audio playback still needs
-manual verification on the player device.
-
-Commit the source, documentation and `package-lock.json`. `.gitignore` excludes
-dependencies, runtime data, private configuration and local animation
-experiments. Ignored files remain on your computer. This project has no
-frontend build or Python runtime dependency.
 
 ## License
 
