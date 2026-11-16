@@ -1,5 +1,8 @@
 /* Request-scoped loading layer, with the supplied Astronya mascot. */
-.song-search[hidden] { display: none; }
+.song-search[hidden] {
+    display: none;
+}
+
 .song-search {
     position: fixed;
     inset: 0;
@@ -7,27 +10,151 @@
     display: grid;
     place-items: center;
     padding: 24px;
-    background: rgba(16, 15, 22, .86);
+    background: rgba(51, 51, 51, 0.86);
     backdrop-filter: blur(8px);
     overscroll-behavior: contain;
     outline: none;
 }
-body.song-searching { overflow: hidden; }
-.song-search-content { display: grid; justify-items: center; gap: 18px; text-align: center; }
-.song-search-mascot { animation: song-float 4s ease-in-out infinite; filter: drop-shadow(0 12px 24px #4b98f025); }
-.song-search-mascot svg { display: block; width: 100px; height: 160px; overflow: visible; }
-.song-search-shadow { width: 48px; height: 5px; margin-top: -12px; background: #4b98f040; border-radius: 50%; filter: blur(4px); animation: song-shadow 4s ease-in-out infinite; }
-.song-search-status { display: flex; align-items: center; gap: 12px; color: var(--paper-light); font: 500 clamp(12px, 3vw, 14px) var(--mono); letter-spacing: .12em; text-transform: uppercase; }
-.song-search-dots { display: flex; gap: 5px; }
-.song-search-dots i { width: 4px; height: 4px; border-radius: 50%; background: #4b98f0; animation: song-dot 1.5s ease-in-out infinite; }
-.song-search-dots i:nth-child(2) { animation-delay: .18s; }
-.song-search-dots i:nth-child(3) { animation-delay: .36s; }
-.song-search-content p { margin: 0; color: var(--muted); font: 12px/1.6 var(--body); }
-.song-search .eye { transform-box: fill-box; transform-origin: center; animation: song-blink 6.8s infinite; }
-@keyframes song-blink { 0%,40%,44%,47%,51%,100% { transform: scaleY(1); } 42%,49% { transform: scaleY(.06); } }
-@keyframes song-float { 0%,100% { transform: translateY(0) rotate(-1deg); } 50% { transform: translateY(-4px) rotate(1deg); } }
-@keyframes song-shadow { 0%,100% { transform: scaleX(1); opacity: .8; } 50% { transform: scaleX(.8); opacity: .4; } }
-@keyframes song-dot { 0%,60%,100% { opacity: .25; transform: translateY(0); } 30% { opacity: 1; transform: translateY(-3px); } }
+
+body.song-searching {
+    overflow: hidden;
+}
+
+.song-search-content {
+    display: grid;
+    justify-items: center;
+    gap: 18px;
+    text-align: center;
+}
+
+.song-search-mascot {
+    animation: song-float 4s ease-in-out infinite;
+    filter: drop-shadow(0 12px 24px #4b98f025);
+}
+
+.song-search-mascot svg {
+    display: block;
+    width: 100px;
+    height: 160px;
+    overflow: visible;
+}
+
+.song-search-shadow {
+    width: 48px;
+    height: 5px;
+    margin-top: -12px;
+    background: #4b98f040;
+    border-radius: 50%;
+    filter: blur(4px);
+    animation: song-shadow 4s ease-in-out infinite;
+}
+
+.song-search-status {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--paper-light);
+    font: 500 clamp(12px, 3vw, 14px) var(--mono);
+    letter-spacing: .12em;
+    text-transform: uppercase;
+}
+
+.song-search-dots {
+    display: flex;
+    gap: 5px;
+}
+
+.song-search-dots i {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: #4b98f0;
+    animation: song-dot 1.5s ease-in-out infinite;
+}
+
+.song-search-dots i:nth-child(2) {
+    animation-delay: .18s;
+}
+
+.song-search-dots i:nth-child(3) {
+    animation-delay: .36s;
+}
+
+.song-search-content p {
+    margin: 0;
+    color: var(--muted);
+    font: 12px/1.6 var(--body);
+}
+
+.song-search .eye {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: song-blink 6.8s infinite;
+}
+
+@keyframes song-blink {
+
+    0%,
+    40%,
+    44%,
+    47%,
+    51%,
+    100% {
+        transform: scaleY(1);
+    }
+
+    42%,
+    49% {
+        transform: scaleY(.06);
+    }
+}
+
+@keyframes song-float {
+
+    0%,
+    100% {
+        transform: translateY(0) rotate(-1deg);
+    }
+
+    50% {
+        transform: translateY(-4px) rotate(1deg);
+    }
+}
+
+@keyframes song-shadow {
+
+    0%,
+    100% {
+        transform: scaleX(1);
+        opacity: .8;
+    }
+
+    50% {
+        transform: scaleX(.8);
+        opacity: .4;
+    }
+}
+
+@keyframes song-dot {
+
+    0%,
+    60%,
+    100% {
+        opacity: .25;
+        transform: translateY(0);
+    }
+
+    30% {
+        opacity: 1;
+        transform: translateY(-3px);
+    }
+}
+
 @media (prefers-reduced-motion: reduce) {
-    .song-search *, .song-search *::before, .song-search *::after { animation: none !important; }
+
+    .song-search *,
+    .song-search *::before,
+    .song-search *::after {
+        animation: none !important;
+    }
 }
