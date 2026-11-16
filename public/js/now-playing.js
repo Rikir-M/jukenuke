@@ -19,7 +19,7 @@ function renderNowPlaying(data) {
 
         npBy.innerHTML = `
     REQUESTED BY ${escapeHtml(
-        data.current.addedBy || "someone",
+        data.current.addedBy || "SOMEONE",
     )}
     <span class="track-time">
         <span class="elapsed" id="elapsed">--:--</span>${

@@ -27,7 +27,7 @@ function renderQueue(data) {
 
             <div class="track-by">
                 ADDED BY
-                ${escapeHtml(item.addedBy || "someone")}
+                ${escapeHtml(item.addedBy || "SOMEONE")}
             </div>
         </div>
 
