@@ -7,6 +7,7 @@ const config = require("./config");
 const { state, runtime, save } = require("./state");
 const reactions = require("./reactions");
 const abuseGuard = require("./abuseGuard");
+const { cancelLookups } = require("./lookup");
 
 function playNext() {
   if (runtime.current || runtime.paused) {
@@ -89,43 +90,56 @@ function playNext() {
 }
 
 function skipCurrent() {
+  // Next ends the current track's pause, even when there is no next track yet.
+  runtime.paused = false;
   if (runtime.current && runtime.current.player) {
+    runtime.current.stopping = true;
     runtime.current.player.kill("SIGTERM");
     // The close handler will call playNext().
+  } else {
+    playNext();
   }
 }
 
-function pause() {
-  runtime.paused = true;
+async function controlCurrent(command) {
+  const current = runtime.current;
+  if (!current) return;
+  await backend.sendCommand(command);
+  if (runtime.current !== current || current.stopping)
+    throw new Error("Track changed during player command");
+}
 
+async function pause() {
   // Actually pause the audio, not just gate whether the next song starts.
   if (runtime.current) {
-    backend.sendCommand(["set_property", "pause", true]);
+    await controlCurrent(["set_property", "pause", true]);
   }
+  runtime.paused = true;
 }
 
-function resume() {
-  runtime.paused = false;
-
+async function resume() {
   if (runtime.current) {
-    backend.sendCommand(["set_property", "pause", false]);
+    await controlCurrent(["set_property", "pause", false]);
+    runtime.paused = false;
   } else {
+    runtime.paused = false;
     // Nothing was mid-playback (e.g. paused while the queue was
     // empty) — see if there's something to start now.
     playNext();
   }
 }
 
-function setVolume(value) {
-  runtime.volume = Math.max(0, Math.min(100, value));
-
-  backend.sendCommand(["set_property", "volume", runtime.volume]);
+async function setVolume(value) {
+  const volume = Math.max(0, Math.min(100, value));
+  if (runtime.current) await controlCurrent(["set_property", "volume", volume]);
+  runtime.volume = volume;
 
   return runtime.volume;
 }
 
 // Clears everything waiting and stops what's playing.
 function clearQueueAndStop() {
+  cancelLookups();
   abuseGuard.forgetAllQueued();
   state.queue = [];
 
@@ -137,17 +151,31 @@ function clearQueueAndStop() {
 async function getPlayback() {
   let timePos = null;
   let duration = null;
+  let playbackStatus = "loading";
 
   const current = runtime.current;
   if (current) {
-    const props = await backend.queryProperties(["time-pos", "duration"]);
-    if (runtime.current !== current) return { timePos, duration };
+    const props = await backend.queryProperties([
+      "time-pos",
+      "duration",
+      "core-idle",
+      "paused-for-cache",
+    ]);
+    if (runtime.current !== current)
+      return { timePos, duration, playbackStatus };
 
-    if (typeof props["time-pos"] === "number") timePos = props["time-pos"];
-    if (typeof props.duration === "number") duration = props.duration;
+    if (Number.isFinite(props["time-pos"])) timePos = props["time-pos"];
+    if (Number.isFinite(props.duration)) duration = props.duration;
+    if (timePos !== null) {
+      playbackStatus = runtime.paused
+        ? "paused"
+        : props["paused-for-cache"] === true || props["core-idle"] === true
+          ? "buffering"
+          : "playing";
+    }
   }
 
-  return { timePos, duration };
+  return { timePos, duration, playbackStatus };
 }
 
 module.exports = {

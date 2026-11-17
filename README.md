@@ -133,6 +133,12 @@ Queue saves replace the file atomically. Invalid saved data is preserved
 beside the queue file with an `.invalid-<timestamp>` suffix before starting
 with an empty queue.
 
+If saving fails, playback continues with the queue in memory and the page
+shows a warning. Changes may be lost on restart until a later save succeeds.
+Stop music and End session cancel song lookups already in progress. Pause,
+resume, and volume commands wait for the player to acknowledge them, retrying
+for up to three seconds during startup before reporting an error.
+
 Set these variables in the shell before starting the server. The app does not
 automatically load `.env` files. Never commit your real configuration or PIN.
 

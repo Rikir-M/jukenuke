@@ -57,15 +57,17 @@ router.post("/queue", async (req, res) => {
 
     return res
       .status(
-        err.code === "LOOKUP_TIMEOUT"
-          ? 504
-          : err.code === "YTDLP_NOT_FOUND"
-            ? 503
-            : 500,
+        err.code === "LOOKUP_CANCELLED"
+          ? 409
+          : err.code === "LOOKUP_TIMEOUT"
+            ? 504
+            : err.code === "YTDLP_NOT_FOUND"
+              ? 503
+              : 500,
       )
       .json({
         error:
-          err.code === "YTDLP_NOT_FOUND"
+          err.code === "YTDLP_NOT_FOUND" || err.code === "LOOKUP_CANCELLED"
             ? err.message
             : err.code === "LOOKUP_TIMEOUT"
               ? err.message
@@ -82,7 +84,7 @@ router.post("/queue", async (req, res) => {
     requestedAs: originalInput, // what the user actually typed
     target: meta.url,
     thumbnail: meta.thumbnail,
-    addedBy: addedBy?.trim() || "someone",
+    addedBy: addedBy?.trim() || "SOMEONE",
     addedAt: Date.now(),
   };
 

@@ -69,6 +69,151 @@ describe("the page", () => {
     assert.match(doc.getElementById("dev-badge").textContent, /FAKE MODE/);
   });
 
+  test("late reaction responses cannot overwrite the next track", async () => {
+    const window = dom.window;
+    window.stopPolling();
+    await window.refresh();
+    const originalFetch = window.fetch;
+    const buttons = [...doc.querySelectorAll(".reaction-btn")];
+    const emoji = buttons[0].dataset.emoji;
+    const counts = Object.fromEntries(
+      buttons.map((button) => [button.dataset.emoji, 0]),
+    );
+    let release;
+    window.fetch = (url, options) =>
+      String(url) === "/api/react"
+        ? new Promise((resolve) => {
+            release = resolve;
+          })
+        : originalFetch(url, options);
+    try {
+      window.renderReactions({ id: 501, reactions: counts, myReactions: [] });
+      buttons[0].click();
+      window.renderReactions({ id: 502, reactions: counts, myReactions: [] });
+      release({
+        ok: true,
+        status: 200,
+        json: async () => ({
+          reactions: { ...counts, [emoji]: 1 },
+          myReactions: [emoji],
+        }),
+      });
+      await sleep(30);
+      assert.equal(
+        buttons[0].querySelector(".reaction-count").textContent,
+        "0",
+      );
+      assert.equal(buttons[0].classList.contains("active"), false);
+    } finally {
+      window.fetch = originalFetch;
+      await window.refresh();
+      window.startPolling();
+    }
+  });
+
+  test("save warning is visible during persistence failure and clears on recovery", async () => {
+    const window = dom.window;
+    window.stopPolling();
+    await window.refresh();
+    const originalFetch = window.fetch;
+    const state = await s.get("/api/state");
+    try {
+      window.fetch = async () => ({
+        ok: true,
+        status: 200,
+        json: async () => ({ ...state, persistenceError: true }),
+      });
+      await window.refresh();
+      assert.equal(doc.getElementById("storage-status").hidden, false);
+      assert.equal(doc.getElementById("connection-status").hidden, true);
+      window.fetch = async () => ({
+        ok: true,
+        status: 200,
+        json: async () => ({ ...state, persistenceError: false }),
+      });
+      await window.refresh();
+      assert.equal(doc.getElementById("storage-status").hidden, true);
+    } finally {
+      window.fetch = originalFetch;
+      await window.refresh();
+      window.startPolling();
+    }
+  });
+
+  test("record and clock wait for audio and stop while buffering", async () => {
+    const window = dom.window;
+    window.stopPolling();
+    await window.refresh();
+    const data = {
+      paused: false,
+      queue: [],
+      current: {
+        id: 99,
+        title: "Slow track",
+        addedBy: "Tester",
+        thumbnail: null,
+        timePos: null,
+        duration: null,
+        playbackStatus: "loading",
+        loadingSeconds: 16,
+      },
+    };
+    try {
+      window.renderNowPlaying(data);
+      assert.equal(
+        doc.getElementById("np-eyebrow").textContent,
+        "LOADING AUDIO",
+      );
+      assert.equal(doc.getElementById("on-air-text").textContent, "LOADING");
+      assert.equal(
+        doc.getElementById("platter").classList.contains("spinning"),
+        false,
+      );
+      assert.equal(
+        doc.getElementById("tonearm").classList.contains("down"),
+        false,
+      );
+      assert.match(doc.getElementById("elapsed").textContent, /WAITING/);
+      assert.match(
+        doc.querySelector(".playback-message").textContent,
+        /WAIT OR SKIP/,
+      );
+
+      Object.assign(data.current, {
+        playbackStatus: "playing",
+        timePos: 4,
+        duration: 100,
+      });
+      window.renderNowPlaying(data);
+      assert.equal(
+        doc.getElementById("platter").classList.contains("spinning"),
+        true,
+      );
+      assert.equal(doc.getElementById("elapsed").textContent, "0:04");
+      assert.equal(doc.querySelector(".playback-message"), null);
+
+      data.current.playbackStatus = "buffering";
+      window.renderNowPlaying(data);
+      assert.equal(doc.getElementById("on-air-text").textContent, "BUFFERING");
+      assert.equal(
+        doc.getElementById("platter").classList.contains("spinning"),
+        false,
+      );
+      await sleep(1100);
+      assert.equal(doc.getElementById("elapsed").textContent, "0:04");
+
+      data.current.playbackStatus = "playing";
+      window.renderNowPlaying(data);
+      assert.equal(
+        doc.getElementById("platter").classList.contains("spinning"),
+        true,
+      );
+    } finally {
+      await window.refresh();
+      window.startPolling();
+    }
+  });
+
   test("request fields and volume have accessible names and length limits", () => {
     for (const id of ["song-input", "name-input", "volume-slider"]) {
       assert.ok(doc.getElementById(id).getAttribute("aria-label"));
@@ -344,6 +489,39 @@ describe("the page", () => {
     } finally {
       window.fetch = originalFetch;
     }
+  });
+
+  test("Next clears the pause button and a newly requested song starts automatically", async () => {
+    const window = dom.window;
+    await s.post("/api/stop-music");
+    await s.post("/api/queue", { input: "Pause then skip" });
+    await window.refresh();
+    const pause = doc.getElementById("pause-btn");
+    pause.click();
+    await waitFor(() => pause.dataset.paused === "true" && !pause.disabled);
+    doc.getElementById("skip-btn").click();
+    await waitFor(
+      () =>
+        pause.dataset.paused === "false" &&
+        /QUEUE IS EMPTY/.test(doc.getElementById("np-title").textContent),
+    );
+    assert.equal(doc.getElementById("pause-btn-text").textContent, "Pause");
+
+    doc.getElementById("song-input").value = "Autoplay after skip";
+    doc
+      .getElementById("add-form")
+      .dispatchEvent(
+        new window.Event("submit", { bubbles: true, cancelable: true }),
+      );
+    await waitFor(
+      () =>
+        doc.getElementById("np-title").textContent ===
+        "Fake: Autoplay after skip",
+      6000,
+    );
+    assert.equal(doc.getElementById("np-eyebrow").textContent, "NOW SPINNING");
+    assert.equal(doc.querySelectorAll(".setlist-row").length, 0);
+    assert.equal(pause.dataset.paused, "false");
   });
 
   test("queue changes retain existing buttons and move focus when a track is removed", async () => {

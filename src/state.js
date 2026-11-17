@@ -59,6 +59,7 @@ const runtime = {
   current: null, // { ...item, startedAt, player, reactionVoters }
   paused: false,
   volume: 80,
+  persistenceError: false,
 };
 
 let nextIdValue =
@@ -71,13 +72,23 @@ function nextId() {
 }
 
 function save() {
-  fs.mkdirSync(config.DATA_DIR, { recursive: true });
   const temporary = `${config.QUEUE_FILE}.${process.pid}.tmp`;
   try {
+    fs.mkdirSync(config.DATA_DIR, { recursive: true });
     fs.writeFileSync(temporary, JSON.stringify(state, null, 2));
     fs.renameSync(temporary, config.QUEUE_FILE);
+    runtime.persistenceError = false;
+    return true;
+  } catch (error) {
+    runtime.persistenceError = true;
+    console.error("Could not save queue; continuing in memory:", error.message);
+    return false;
   } finally {
-    if (fs.existsSync(temporary)) fs.unlinkSync(temporary);
+    try {
+      if (fs.existsSync(temporary)) fs.unlinkSync(temporary);
+    } catch (error) {
+      console.error("Could not clean up temporary queue file:", error.message);
+    }
   }
 }
 

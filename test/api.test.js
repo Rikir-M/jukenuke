@@ -181,7 +181,83 @@ describe("queue, playback and reactions (fake mode)", () => {
   });
 });
 
+describe("skipping paused tracks", () => {
+  test("skipping the last paused song returns to idle and future adds play automatically", async () => {
+    const s = await startServer({ DEV_FAKE_SECONDS: "30" });
+    try {
+      await s.post("/api/queue", { input: "First track" });
+      await s.post("/api/pause");
+      assert.equal((await s.get("/api/state")).paused, true);
+      await s.post("/api/skip");
+      await waitFor(async () => (await s.get("/api/state")).current === null);
+      const idle = await s.get("/api/state");
+      assert.equal(idle.paused, false);
+      assert.deepEqual(idle.queue, []);
+
+      await s.post("/api/queue", { input: "New track" });
+      const playing = await s.get("/api/state");
+      assert.equal(playing.current.title, "Fake: New track");
+      assert.equal(playing.current.playbackStatus, "playing");
+      assert.equal(playing.paused, false);
+      assert.deepEqual(playing.queue, []);
+    } finally {
+      s.stop();
+    }
+  });
+
+  test("skipping a paused track starts the queued successor", async () => {
+    const s = await startServer({ DEV_FAKE_SECONDS: "30" });
+    try {
+      await s.post("/api/queue", { input: "First track" });
+      await s.post("/api/queue", { input: "Next track" });
+      await s.post("/api/pause");
+      await s.post("/api/skip");
+      await waitFor(
+        async () =>
+          (await s.get("/api/state")).current?.title === "Fake: Next track",
+      );
+      const playing = await s.get("/api/state");
+      assert.equal(playing.paused, false);
+      assert.equal(playing.current.playbackStatus, "playing");
+    } finally {
+      s.stop();
+    }
+  });
+});
+
 describe("abuse guard", () => {
+  test("Stop cancels pending lookups and permits fresh requests afterward", async () => {
+    const s = await startServer({ DEV_FAKE_SECONDS: "30" });
+    try {
+      const adding = s.post("/api/queue", {
+        input: "Lookup interrupted by Stop",
+      });
+      await waitFor(() =>
+        s
+          .output()
+          .includes("Looking up on YouTube: Lookup interrupted by Stop"),
+      );
+      assert.equal((await s.post("/api/stop-music")).status, 200);
+      const cancelled = await adding;
+      assert.equal(cancelled.status, 409);
+      assert.match(cancelled.body.error, /cancelled/);
+      await sleep(450);
+      const idle = await s.get("/api/state");
+      assert.equal(idle.current, null);
+      assert.deepEqual(idle.queue, []);
+      assert.equal(
+        (await s.post("/api/queue", { input: "Fresh request after Stop" }))
+          .status,
+        200,
+      );
+      assert.equal(
+        (await s.get("/api/state")).current.title,
+        "Fake: Fresh request after Stop",
+      );
+    } finally {
+      s.stop();
+    }
+  });
   test("disconnecting during lookup cancels the add and releases its reservation", async () => {
     const s = await startServer({ JUKENUKE_ADD_COOLDOWN_MS: "60000" });
     const http = require("node:http");

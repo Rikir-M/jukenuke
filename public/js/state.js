@@ -35,6 +35,7 @@ async function refreshState() {
 
     serverReachable = true;
     document.getElementById("connection-status").hidden = true;
+    document.getElementById("storage-status").hidden = !data.persistenceError;
 
     syncVolume(data);
     syncPauseButton(data);

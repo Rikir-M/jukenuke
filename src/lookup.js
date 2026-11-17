@@ -1,10 +1,23 @@
 const backend = require("./backend");
 
 const LOOKUP_TIMEOUT_MS = 30000;
+const activeLookups = new Set();
+
+function cancelLookups() {
+  for (const controller of activeLookups) {
+    controller.abort(
+      Object.assign(
+        new Error("Search cancelled because the music was stopped"),
+        { code: "LOOKUP_CANCELLED" },
+      ),
+    );
+  }
+}
 
 // Bound every backend lookup, even if a backend ignores cancellation.
 async function lookup(input, signal, timeoutMs = LOOKUP_TIMEOUT_MS) {
   const controller = new AbortController();
+  activeLookups.add(controller);
   const cancel = () => controller.abort(signal.reason);
   signal?.addEventListener("abort", cancel, { once: true });
   if (signal?.aborted) cancel();
@@ -32,10 +45,11 @@ async function lookup(input, signal, timeoutMs = LOOKUP_TIMEOUT_MS) {
       }),
     ]);
   } finally {
+    activeLookups.delete(controller);
     clearTimeout(timer);
     signal?.removeEventListener("abort", cancel);
     controller.signal.removeEventListener("abort", onAbort);
   }
 }
 
-module.exports = { lookup };
+module.exports = { lookup, cancelLookups };

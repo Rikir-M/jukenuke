@@ -25,7 +25,8 @@
   --mono: "IBM Plex Mono", monospace;
 }
 
-#connection-status {
+#connection-status,
+#storage-status {
   position: fixed;
   bottom: 12px;
   left: 50%;
@@ -42,6 +43,10 @@
   text-align: center;
   width: max-content;
   max-width: calc(100% - 24px);
+}
+
+#storage-status {
+  bottom: 64px;
 }
 
 * {

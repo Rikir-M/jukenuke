@@ -6,20 +6,21 @@
 //   lookup(input)            -> Promise<{ title, url, thumbnail }>
 //   spawnPlayer(item, vol)   -> process-like: .stdout .stderr .kill(),
 //                               emits 'close' when the song ends
-//   sendCommand([...])       -> mpv-style, e.g. ['set_property','pause',true]
+//   sendCommand([...])       -> Promise, resolves when mpv acknowledges;
+//                               e.g. ['set_property','pause',true]
 //   queryProperties([...])   -> Promise<{ 'time-pos'?, duration? }>
 //   banner                   -> lines printed at startup
 //   stateExtras()            -> extra fields for GET /api/state
 
-const youtube = require('./youtube');
-const mpv = require('./mpv');
+const youtube = require("./youtube");
+const mpv = require("./mpv");
 
 module.exports = {
-  name: 'real',
+  name: "real",
   banner: [],
   lookup: youtube.lookup,
   spawnPlayer: mpv.spawnPlayer,
   sendCommand: mpv.sendCommand,
   queryProperties: mpv.queryProperties,
-  stateExtras: () => ({})
+  stateExtras: () => ({}),
 };

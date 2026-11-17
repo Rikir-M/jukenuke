@@ -11,6 +11,7 @@ const demoReactions = new Set(); // local-only votes, no server
 let currentSongId = null;
 let lastReactionCounts = null;
 let serverReachable = false;
+let reactionRequest = 0;
 
 function spawnReactionFloat(emoji) {
   const el = document.createElement("span");
@@ -153,6 +154,8 @@ reactionsEl.addEventListener("click", async (e) => {
     return;
   }
 
+  const songId = currentSongId;
+  const request = ++reactionRequest;
   try {
     const res = await apiFetch("/api/react", {
       method: "POST",
@@ -160,12 +163,13 @@ reactionsEl.addEventListener("click", async (e) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        songId: currentSongId,
+        songId,
         emoji,
       }),
     });
 
     const data = await res.json().catch(() => ({}));
+    if (currentSongId !== songId || request !== reactionRequest) return;
 
     if (!res.ok) {
       // The song changed or stopped between the tap and
@@ -185,6 +189,7 @@ reactionsEl.addEventListener("click", async (e) => {
       spawnReactionFloat(emoji);
     }
   } catch (err) {
+    if (currentSongId !== songId || request !== reactionRequest) return;
     showToast("COULD NOT CONNECT TO JUKE NUKE");
   }
 });

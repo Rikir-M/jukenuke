@@ -114,6 +114,8 @@ function queryProperties(properties) {
   const values = {
     "time-pos": activePlayer.position,
     duration: activePlayer.duration,
+    "core-idle": activePlayer.paused,
+    "paused-for-cache": false,
   };
 
   properties.forEach((prop) => {

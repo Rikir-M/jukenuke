@@ -1,31 +1,36 @@
 // Plays audio through mpv, and talks to it over its IPC socket.
 
-const { spawn } = require('child_process');
-const net = require('net');
-const { MPV_SOCKET } = require('../config');
+const { spawn } = require("child_process");
+const net = require("net");
+const { MPV_SOCKET } = require("../config");
+
+const { createControls } = require("./mpv-control");
+let activeControls = null;
 
 function spawnPlayer(item, volume) {
-  return spawn('mpv', [
-    '--no-video',
-    '--no-terminal',
-    '--ytdl-format=bestaudio/best',
+  activeControls?.stop();
+  const controls = createControls();
+  activeControls = controls;
+  const player = spawn("mpv", [
+    "--no-video",
+    "--no-terminal",
+    "--ytdl-format=bestaudio/best",
     `--volume=${volume}`,
     `--input-ipc-server=${MPV_SOCKET}`,
-    item.target
+    item.target,
   ]);
+  const finish = () => {
+    controls.stop();
+    if (activeControls === controls) activeControls = null;
+  };
+  player.once("error", finish);
+  player.once("close", finish);
+  return player;
 }
 
-// Fire-and-forget: ['set_property', 'pause', true] etc.
-function sendCommand(commandArr) {
-  const sock = net.createConnection(MPV_SOCKET);
-
-  sock.on('connect', () => {
-    sock.write(JSON.stringify({ command: commandArr }) + '\n');
-    sock.end();
-  });
-
-  // mpv might not be running yet, or the socket not ready — fine, just drop it.
-  sock.on('error', () => {});
+function sendCommand(command) {
+  if (!activeControls) return Promise.reject(new Error("No active player"));
+  return activeControls.send(command);
 }
 
 // Reads properties back from mpv over the same IPC socket (playback
@@ -36,8 +41,9 @@ function queryProperties(properties, timeoutMs = 400) {
     const result = {};
     const sock = net.createConnection(MPV_SOCKET);
 
-    let buffer = '';
+    let buffer = "";
     let pending = properties.length;
+    const received = new Set();
 
     const finish = () => {
       clearTimeout(timer);
@@ -47,21 +53,21 @@ function queryProperties(properties, timeoutMs = 400) {
 
     const timer = setTimeout(finish, timeoutMs);
 
-    sock.on('connect', () => {
+    sock.on("connect", () => {
       properties.forEach((prop, requestId) => {
         sock.write(
           JSON.stringify({
-            command: ['get_property', prop],
-            request_id: requestId
-          }) + '\n'
+            command: ["get_property", prop],
+            request_id: requestId,
+          }) + "\n",
         );
       });
     });
 
-    sock.on('data', (data) => {
+    sock.on("data", (data) => {
       buffer += data.toString();
 
-      const lines = buffer.split('\n');
+      const lines = buffer.split("\n");
       buffer = lines.pop();
 
       for (const line of lines) {
@@ -75,8 +81,16 @@ function queryProperties(properties, timeoutMs = 400) {
           continue;
         }
 
-        if (typeof msg.request_id === 'number' && msg.error === 'success') {
-          result[properties[msg.request_id]] = msg.data;
+        if (
+          Number.isInteger(msg.request_id) &&
+          msg.request_id >= 0 &&
+          msg.request_id < properties.length &&
+          !received.has(msg.request_id)
+        ) {
+          received.add(msg.request_id);
+          if (msg.error === "success") {
+            result[properties[msg.request_id]] = msg.data;
+          }
           pending--;
         }
       }
@@ -86,7 +100,8 @@ function queryProperties(properties, timeoutMs = 400) {
       }
     });
 
-    sock.on('error', finish);
+    sock.on("error", finish);
+    sock.on("end", finish);
   });
 }
 

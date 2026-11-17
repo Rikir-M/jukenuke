@@ -8,24 +8,42 @@ const { runtime } = require("../state");
 
 const router = express.Router();
 
-router.post("/pause", (req, res) => {
-  player.pause();
+router.post("/pause", async (req, res) => {
+  try {
+    await player.pause();
+  } catch (err) {
+    return res
+      .status(503)
+      .json({ error: "Could not pause the player. Please try again." });
+  }
   res.json({ ok: true, paused: runtime.paused });
 });
 
-router.post("/resume", (req, res) => {
-  player.resume();
+router.post("/resume", async (req, res) => {
+  try {
+    await player.resume();
+  } catch (err) {
+    return res
+      .status(503)
+      .json({ error: "Could not resume the player. Please try again." });
+  }
   res.json({ ok: true, paused: runtime.paused });
 });
 
-router.post("/volume", (req, res) => {
+router.post("/volume", async (req, res) => {
   const value = Math.round(Number((req.body || {}).volume));
 
   if (!Number.isFinite(value)) {
     return res.status(400).json({ error: "volume must be a number 0-100" });
   }
 
-  res.json({ ok: true, volume: player.setVolume(value) });
+  try {
+    res.json({ ok: true, volume: await player.setVolume(value) });
+  } catch (err) {
+    res
+      .status(503)
+      .json({ error: "Could not change the player volume. Please try again." });
+  }
 });
 
 router.post("/skip", requirePin, (req, res) => {
