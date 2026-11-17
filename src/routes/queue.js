@@ -1,27 +1,35 @@
 // Adding songs to the queue and taking them out again.
 
-const express = require('express');
-const backend = require('../backend');
-const { state, nextId, save } = require('../state');
-const abuseGuard = require('../abuseGuard');
-const { playNext } = require('../player');
-const { getIp } = require('../util');
+const express = require("express");
+const { lookup } = require("../lookup");
+const { state, nextId, save } = require("../state");
+const abuseGuard = require("../abuseGuard");
+const { playNext } = require("../player");
+const { getIp } = require("../util");
 
 const router = express.Router();
 
-router.post('/queue', async (req, res) => {
+router.post("/queue", async (req, res) => {
   const { input, addedBy } = req.body || {};
 
-  if (!input || !input.trim()) {
+  if (typeof input !== "string" || !input.trim() || input.length > 1000) {
     return res.status(400).json({
-      error: 'input (YouTube link or "title - artist") is required'
+      error: "Song input is required and must be text, at most 1000 characters",
     });
+  }
+  if (
+    addedBy !== undefined &&
+    (typeof addedBy !== "string" || addedBy.length > 80)
+  ) {
+    return res
+      .status(400)
+      .json({ error: "Name must be text, at most 80 characters" });
   }
 
   const ip = getIp(req);
   const now = Date.now();
 
-  const blocked = abuseGuard.checkCanAdd(ip, now);
+  const blocked = abuseGuard.reserveLookup(ip, now);
 
   if (blocked) {
     return res.status(429).json({ error: blocked });
@@ -30,21 +38,42 @@ router.post('/queue', async (req, res) => {
   const originalInput = input.trim();
 
   let meta;
+  const controller = new AbortController();
+  const cancel = () => {
+    if (!res.writableEnded) controller.abort();
+  };
+  res.on("close", cancel);
 
   try {
     console.log(`Looking up on YouTube: ${originalInput}`);
 
-    meta = await backend.lookup(originalInput);
+    meta = await lookup(originalInput, controller.signal);
+    if (controller.signal.aborted) return;
 
     console.log(`YouTube result: ${meta.title} (${meta.url})`);
   } catch (err) {
-    console.error('YouTube lookup failed:', err.message);
+    if (controller.signal.aborted) return;
+    console.error("YouTube lookup failed:", err.message);
 
-    return res.status(err.code === 'YTDLP_NOT_FOUND' ? 503 : 500).json({
-      error: err.code === 'YTDLP_NOT_FOUND'
-        ? err.message
-        : 'Could not find that song on YouTube'
-    });
+    return res
+      .status(
+        err.code === "LOOKUP_TIMEOUT"
+          ? 504
+          : err.code === "YTDLP_NOT_FOUND"
+            ? 503
+            : 500,
+      )
+      .json({
+        error:
+          err.code === "YTDLP_NOT_FOUND"
+            ? err.message
+            : err.code === "LOOKUP_TIMEOUT"
+              ? err.message
+              : "Could not find that song on YouTube",
+      });
+  } finally {
+    abuseGuard.releaseLookup(ip);
+    res.removeListener("close", cancel);
   }
 
   const item = {
@@ -53,12 +82,12 @@ router.post('/queue', async (req, res) => {
     requestedAs: originalInput, // what the user actually typed
     target: meta.url,
     thumbnail: meta.thumbnail,
-    addedBy: (addedBy || 'someone').trim(),
-    addedAt: now
+    addedBy: addedBy?.trim() || "someone",
+    addedAt: Date.now(),
   };
 
   state.queue.push(item);
-  abuseGuard.recordAdd(ip, item.id, now);
+  abuseGuard.recordAdd(ip, item.id, Date.now());
 
   save();
 
@@ -67,7 +96,7 @@ router.post('/queue', async (req, res) => {
   res.json({ ok: true, item });
 });
 
-router.delete('/queue/:id', (req, res) => {
+router.delete("/queue/:id", (req, res) => {
   const id = Number(req.params.id);
 
   state.queue = state.queue.filter((s) => s.id !== id);

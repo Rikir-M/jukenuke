@@ -19,8 +19,9 @@ npm install
 npm start
 ```
 
-Then open `http://<that-device's-ip>:3000`. The control PIN (needed for skip,
-stop and end session) is printed in the terminal on every start.
+Then open `http://<that-device's-ip>:3000`. PIN protection is temporarily disabled: skip, stop, and end session work
+without a PIN. The original verification and browser prompt code are retained
+in comments in `src/pin.js` and `public/js/pin.js`.
 
 On a phone (Termux): `pkg install nodejs mpv yt-dlp`, then
 `npm install --omit=dev` and `npm start`.
@@ -121,6 +122,16 @@ server-side fake code is in `src/dev/`, and nothing loads it unless fake mode is
 on — you can delete that folder from a production install.
 
 ## Settings
+
+Song lookups have a 30-second deadline, with one active lookup per IP and
+four across the server. Use **Cancel search** or Escape to stop waiting;
+the request stays in the form so you can retry. If the connection drops, a
+banner appears until polling reconnects. Song inputs accept up to 1,000
+characters and names up to 80.
+
+Queue saves replace the file atomically. Invalid saved data is preserved
+beside the queue file with an `.invalid-<timestamp>` suffix before starting
+with an empty queue.
 
 Set these variables in the shell before starting the server. The app does not
 automatically load `.env` files. Never commit your real configuration or PIN.

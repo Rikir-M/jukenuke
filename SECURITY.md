@@ -9,16 +9,18 @@ not make the running server suitable for public internet access.
   your router or expose it through a public tunnel.
 - Anyone who can reach it can add/remove songs, pause/resume, adjust volume,
   and read the queue and recent history, including requester names.
-- Skip, stop, and shutdown require a control PIN. The default is four digits;
-  PIN attempts are not rate limited. This is a convenience control, not
-  strong authentication.
+- PIN protection is temporarily disabled. Anyone who can reach the app can
+  skip, stop, and shut down the session. The original PIN code is retained
+  in comments for restoration.
 - Traffic uses HTTP. Keep the PIN private and use a trusted network.
-- Song-add limits are recorded after lookup completes. Concurrent requests
-  can bypass these limits and launch multiple yt-dlp processes. Lookups have
-  no application timeout.
+- Lookup slots are reserved before work starts: one per IP, at most four
+  across the server, with a 30-second deadline. Disconnected requests cancel
+  their lookups. Successful requests start the IP cooldown; failures release
+  the reservation without consuming it. IP limits are shared by users behind
+  the same network address and reset when the server restarts.
 
 Before exposing a deployment to untrusted users, add authentication, request
-and login rate limits, bounded lookup concurrency/timeouts, and HTTPS.
+and login rate limits, and HTTPS.
 
 ## Private files
 

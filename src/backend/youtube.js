@@ -1,6 +1,6 @@
 // Looks songs up on YouTube with yt-dlp.
 
-const { spawn } = require('child_process');
+const { spawn } = require("child_process");
 
 const YT_URL_RE =
   /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be|m\.youtube\.com)\//i;
@@ -27,59 +27,64 @@ function thumbnailForVideoId(id) {
 // Resolves user input (a YouTube URL, or a "title - artist" style
 // search) into the real video's title, playable URL, and thumbnail,
 // using a single yt-dlp lookup.
-function lookup(input) {
+function lookup(input, { signal } = {}) {
   return new Promise((resolve, reject) => {
     const trimmed = input.trim();
 
     // A direct URL is looked up as-is; anything else is a search query.
     const arg = isYouTubeUrl(trimmed) ? trimmed : `ytsearch1:${trimmed}`;
 
-    const yt = spawn('yt-dlp', [
-      arg,
-      '--skip-download',
+    const yt = spawn(
+      "yt-dlp",
+      [
+        arg,
+        "--skip-download",
+        "--no-playlist",
 
-      // Title / url / thumbnail in one pass, tab separated. No
-      // --flat-playlist — that skips the metadata fetch we need.
-      '--print',
-      '%(title)s\t%(webpage_url)s\t%(thumbnail)s',
+        // Title / url / thumbnail in one pass, tab separated. No
+        // --flat-playlist — that skips the metadata fetch we need.
+        "--print",
+        "%(title)s\t%(webpage_url)s\t%(thumbnail)s",
 
-      '--no-warnings'
-    ]);
+        "--no-warnings",
+      ],
+      { signal, killSignal: "SIGKILL" },
+    );
 
-    let stdout = '';
-    let stderr = '';
+    let stdout = "";
+    let stderr = "";
 
-    yt.stdout.on('data', (data) => {
+    yt.stdout.on("data", (data) => {
       stdout += data.toString();
     });
 
-    yt.stderr.on('data', (data) => {
+    yt.stderr.on("data", (data) => {
       stderr += data.toString();
     });
 
-    yt.on('error', (err) => {
-      if (err.code === 'ENOENT') {
+    yt.on("error", (err) => {
+      if (err.code === "ENOENT") {
         const missing = new Error(
-          'yt-dlp is not installed or is not on PATH. Install yt-dlp and mpv for real playback, or use npm run dev:fake to try simulated songs without audio.'
+          "yt-dlp is not installed or is not on PATH. Install yt-dlp and mpv for real playback, or use npm run dev:fake to try simulated songs without audio.",
         );
-        missing.code = 'YTDLP_NOT_FOUND';
+        missing.code = "YTDLP_NOT_FOUND";
         reject(missing);
         return;
       }
       reject(new Error(`Failed to start yt-dlp: ${err.message}`));
     });
 
-    yt.on('close', (code) => {
+    yt.on("close", (code) => {
       if (code !== 0) {
         reject(new Error(stderr.trim() || `yt-dlp exited with code ${code}`));
         return;
       }
 
-      const line = stdout.trim().split('\n')[0] || '';
-      const [rawTitle, rawUrl, rawThumbnail] = line.split('\t');
+      const line = stdout.trim().split("\n")[0] || "";
+      const [rawTitle, rawUrl, rawThumbnail] = line.split("\t");
 
       if (!rawUrl || !/^https?:\/\/(www\.)?youtube\.com\//i.test(rawUrl)) {
-        reject(new Error('No YouTube result found'));
+        reject(new Error("No YouTube result found"));
         return;
       }
 
@@ -87,7 +92,7 @@ function lookup(input) {
       const id = extractYouTubeId(url);
 
       const thumbnail =
-        rawThumbnail && rawThumbnail.trim() && rawThumbnail.trim() !== 'NA'
+        rawThumbnail && rawThumbnail.trim() && rawThumbnail.trim() !== "NA"
           ? rawThumbnail.trim()
           : id
             ? thumbnailForVideoId(id)
@@ -96,7 +101,7 @@ function lookup(input) {
       resolve({
         title: (rawTitle && rawTitle.trim()) || trimmed,
         url,
-        thumbnail
+        thumbnail,
       });
     });
   });

@@ -3,16 +3,50 @@
 //   state    queue + history, saved to disk so a restart keeps them
 //   runtime  what's happening right now (never saved)
 
-const fs = require('fs');
-const path = require('path');
-const config = require('./config');
+const fs = require("fs");
+const path = require("path");
+const config = require("./config");
 
 function load() {
   if (fs.existsSync(config.QUEUE_FILE)) {
     try {
-      return JSON.parse(fs.readFileSync(config.QUEUE_FILE, 'utf8'));
+      const loaded = JSON.parse(fs.readFileSync(config.QUEUE_FILE, "utf8"));
+      if (
+        !loaded ||
+        !Array.isArray(loaded.queue) ||
+        !Array.isArray(loaded.history)
+      ) {
+        throw new Error("Invalid saved queue structure");
+      }
+      const ids = new Set();
+      for (const item of [...loaded.queue, ...loaded.history]) {
+        if (
+          !item ||
+          !Number.isSafeInteger(item.id) ||
+          item.id < 1 ||
+          ids.has(item.id) ||
+          typeof item.title !== "string" ||
+          typeof item.target !== "string" ||
+          !/^https?:\/\/(www\.)?youtube\.com\//i.test(item.target) ||
+          (item.addedBy !== undefined && typeof item.addedBy !== "string")
+        ) {
+          throw new Error("Invalid saved song");
+        }
+        ids.add(item.id);
+      }
+      return {
+        queue: loaded.queue,
+        history: loaded.history.slice(0, config.HISTORY_LIMIT),
+      };
     } catch (e) {
-      console.error(`Failed to parse ${path.basename(config.QUEUE_FILE)}, starting fresh`);
+      console.error(
+        `Invalid ${path.basename(config.QUEUE_FILE)}, preserving it and starting fresh`,
+      );
+      // Keep the original for recovery before startup writes an empty queue.
+      fs.copyFileSync(
+        config.QUEUE_FILE,
+        `${config.QUEUE_FILE}.invalid-${Date.now()}`,
+      );
     }
   }
 
@@ -24,7 +58,7 @@ const state = load();
 const runtime = {
   current: null, // { ...item, startedAt, player, reactionVoters }
   paused: false,
-  volume: 80
+  volume: 80,
 };
 
 let nextIdValue =
@@ -38,7 +72,13 @@ function nextId() {
 
 function save() {
   fs.mkdirSync(config.DATA_DIR, { recursive: true });
-  fs.writeFileSync(config.QUEUE_FILE, JSON.stringify(state, null, 2));
+  const temporary = `${config.QUEUE_FILE}.${process.pid}.tmp`;
+  try {
+    fs.writeFileSync(temporary, JSON.stringify(state, null, 2));
+    fs.renameSync(temporary, config.QUEUE_FILE);
+  } finally {
+    if (fs.existsSync(temporary)) fs.unlinkSync(temporary);
+  }
 }
 
 module.exports = { state, runtime, nextId, save };

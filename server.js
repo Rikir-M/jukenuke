@@ -7,17 +7,17 @@
 
 const config = require("./src/config");
 const backend = require("./src/backend");
-const { CONTROL_PIN } = require("./src/pin");
+// const { CONTROL_PIN } = require("./src/pin");
 const { createApp } = require("./src/app");
 const { playNext } = require("./src/player");
 
 createApp().listen(config.PORT, "0.0.0.0", () => {
-    console.log(`Jukenuke running: http://<phone-ip>:${config.PORT}`);
-    console.log(
+  console.log(`Jukenuke running: http://<phone-ip>:${config.PORT}`);
+  /* console.log(
         `Control PIN (needed for skip / stop music / end session): ${CONTROL_PIN}`,
-    );
+    ); */
 
-    backend.banner.forEach((line) => console.log(line));
+  backend.banner.forEach((line) => console.log(line));
 
-    playNext();
+  playNext();
 });

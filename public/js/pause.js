@@ -16,53 +16,47 @@ const PLAY_ICON_SVG = `
 `;
 
 function setPauseButtonState(isPaused) {
-    pauseBtn.dataset.paused = isPaused ? "true" : "false";
-    pauseBtnText.textContent = isPaused ? "Resume" : "Pause";
-    pauseIcon.innerHTML = isPaused
-        ? PLAY_ICON_SVG
-        : PAUSE_ICON_SVG;
+  pauseBtn.dataset.paused = isPaused ? "true" : "false";
+  pauseBtnText.textContent = isPaused ? "Resume" : "Pause";
+  pauseIcon.innerHTML = isPaused ? PLAY_ICON_SVG : PAUSE_ICON_SVG;
 }
 
 // Keeps the button in step with the server.
 function syncPauseButton(data) {
-    if (typeof data.paused === "boolean") {
-        setPauseButtonState(data.paused);
-    }
+  if (typeof data.paused === "boolean") {
+    setPauseButtonState(data.paused);
+  }
 }
 
 /* Pause / Resume */
 
 pauseBtn.addEventListener("click", async () => {
-    const isPaused = pauseBtn.dataset.paused === "true";
-    const endpoint = isPaused ? "/api/resume" : "/api/pause";
+  const isPaused = pauseBtn.dataset.paused === "true";
+  const endpoint = isPaused ? "/api/resume" : "/api/pause";
 
-    pauseBtn.disabled = true;
+  pauseBtn.disabled = true;
 
-    try {
-        const res = await fetch(endpoint, {
-            method: "POST",
-        });
+  try {
+    const res = await apiFetch(endpoint, {
+      method: "POST",
+    });
 
-        const data = await res.json().catch(() => ({}));
+    const data = await res.json().catch(() => ({}));
 
-        if (!res.ok) {
-            showToast(
-                data.error || "COULD NOT DO THAT RIGHT NOW",
-            );
+    if (!res.ok) {
+      showToast(data.error || "COULD NOT DO THAT RIGHT NOW");
 
-            return;
-        }
-
-        setPauseButtonState(data.paused);
-
-        showToast(
-            data.paused ? "MUSIC PAUSED!" : "MUSIC RESUMED!",
-        );
-
-        refresh();
-    } catch (e) {
-        showToast("COULD NOT CONNECT TO JUKE NUKE");
-    } finally {
-        pauseBtn.disabled = false;
+      return;
     }
+
+    setPauseButtonState(data.paused);
+
+    showToast(data.paused ? "MUSIC PAUSED!" : "MUSIC RESUMED!");
+
+    refresh();
+  } catch (e) {
+    showToast("COULD NOT CONNECT TO JUKE NUKE");
+  } finally {
+    pauseBtn.disabled = false;
+  }
 });

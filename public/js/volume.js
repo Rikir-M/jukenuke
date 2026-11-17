@@ -2,13 +2,15 @@
 
 let isAdjustingVolume = false;
 let volumeSendTimer = null;
+let volumeRequest = 0;
+let volumeController = null;
 
 /* Volume Icon */
 
 function updateVolumeIcon(v) {
-    volumeIcon.innerHTML =
-        v == 0
-            ? `
+  volumeIcon.innerHTML =
+    v == 0
+      ? `
         <svg viewBox="0 0 24 24" fill="none">
             <path
                 d="M4 10v4h4l5 4V6l-5 4H4Z"
@@ -30,8 +32,8 @@ function updateVolumeIcon(v) {
             />
         </svg>
     `
-            : v < 50
-              ? `
+      : v < 50
+        ? `
         <svg viewBox="0 0 24 24" fill="none">
             <path
                 d="M4 10v4h4l5 4V6l-5 4H4Z"
@@ -47,7 +49,7 @@ function updateVolumeIcon(v) {
             />
         </svg>
     `
-              : `
+        : `
         <svg viewBox="0 0 24 24" fill="none">
             <path
                 d="M4 10v4h4l5 4V6l-5 4H4Z"
@@ -74,41 +76,51 @@ function updateVolumeIcon(v) {
 /* Volume */
 
 volumeSlider.addEventListener("input", () => {
-    const v = volumeSlider.value;
+  const v = volumeSlider.value;
 
-    volumeValue.textContent = v;
-    updateVolumeIcon(v);
+  volumeValue.textContent = v;
+  updateVolumeIcon(v);
 
-    isAdjustingVolume = true;
+  isAdjustingVolume = true;
+  const request = ++volumeRequest;
+  volumeController?.abort();
 
-    clearTimeout(volumeSendTimer);
+  clearTimeout(volumeSendTimer);
 
-    volumeSendTimer = setTimeout(async () => {
-        try {
-            await fetch("/api/volume", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    volume: Number(v),
-                }),
-            });
-        } finally {
-            isAdjustingVolume = false;
-        }
-    }, 120);
+  volumeSendTimer = setTimeout(async () => {
+    volumeController = new AbortController();
+    try {
+      const res = await apiFetch("/api/volume", {
+        signal: volumeController.signal,
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          volume: Number(v),
+        }),
+      });
+      if (!res.ok) throw new Error("Volume rejected");
+    } catch (e) {
+      if (request === volumeRequest) showToast("COULD NOT CHANGE VOLUME");
+    } finally {
+      if (request === volumeRequest) {
+        isAdjustingVolume = false;
+        refresh();
+      }
+    }
+  }, 120);
 });
 
 // Keeps the slider in step with the server, unless it's being dragged.
 function syncVolume(data) {
-    if (
-        !isAdjustingVolume &&
-        typeof data.volume === "number" &&
-        Number(volumeSlider.value) !== data.volume
-    ) {
-        volumeSlider.value = data.volume;
-        volumeValue.textContent = data.volume;
-        updateVolumeIcon(data.volume);
-    }
+  if (
+    !isAdjustingVolume &&
+    typeof data.volume === "number" &&
+    Number(volumeSlider.value) !== data.volume
+  ) {
+    volumeSlider.value = data.volume;
+    volumeValue.textContent = data.volume;
+    updateVolumeIcon(data.volume);
+  }
 }
