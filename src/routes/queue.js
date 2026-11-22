@@ -61,13 +61,15 @@ router.post("/queue", async (req, res) => {
           ? 409
           : err.code === "LOOKUP_TIMEOUT"
             ? 504
-            : err.code === "YTDLP_NOT_FOUND"
+            : err.code === "YTDLP_NOT_FOUND" || err.code === "YOUTUBE_BACKOFF"
               ? 503
               : 500,
       )
       .json({
         error:
-          err.code === "YTDLP_NOT_FOUND" || err.code === "LOOKUP_CANCELLED"
+          err.code === "YTDLP_NOT_FOUND" ||
+          err.code === "LOOKUP_CANCELLED" ||
+          err.code === "YOUTUBE_BACKOFF"
             ? err.message
             : err.code === "LOOKUP_TIMEOUT"
               ? err.message

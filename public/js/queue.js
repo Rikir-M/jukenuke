@@ -31,7 +31,7 @@ function renderQueue(data) {
           2,
           "0",
         );
-        row.querySelector(".track-title").textContent = item.title;
+        setScrollingTitle(row.querySelector(".track-title"), item.title);
         row.querySelector(".track-by").textContent =
           `ADDED BY ${item.addedBy || "SOMEONE"}`;
         rows.delete(item.id);
@@ -70,6 +70,7 @@ function renderQueue(data) {
 
       queueList.querySelector(".empty-state")?.remove();
       queueList.insertBefore(row, queueList.children[i] || null);
+      setScrollingTitle(row.querySelector(".track-title"), item.title);
     });
   }
   rows.forEach((row) => row.remove());

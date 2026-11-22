@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <title>JukeNuke — Cosmic Jukenuke</title>
+    <script src="js/appearance.js"></script>
 
     <link rel="icon" type="image/svg+xml" href="./assets/favicon.svg" />
 
@@ -28,19 +29,52 @@
     <link rel="stylesheet" href="css/responsive.css" />
     <link rel="stylesheet" href="css/dev-badge.css" />
     <link rel="stylesheet" href="css/searching.css" />
+    <link rel="stylesheet" href="css/interfaces.css" />
   </head>
 
   <body>
     <div class="wrap">
+      <div
+        class="interface-backdrop"
+        id="interface-backdrop"
+        aria-hidden="true"
+        hidden
+      ></div>
       <!-- HEADER -->
       <header>
         <div class="brand">
           <div class="wordmark">Juke<span>Nuke</span></div>
-          <div class="card-label beta-tag">BETA</div>
 
           <div class="tagline">// cosmic sound system //</div>
         </div>
 
+        <div class="interface-picker" role="group" aria-label="Interface">
+          <button type="button" data-interface="classic" aria-pressed="true">
+            <span class="interface-symbol" aria-hidden="true">◎</span>Classic
+          </button>
+          <button type="button" data-interface="studio" aria-pressed="false">
+            <span class="interface-symbol" aria-hidden="true">◈</span>Studio
+          </button>
+          <button type="button" data-interface="tape" aria-pressed="false">
+            <span class="interface-symbol" aria-hidden="true">▣</span>Tape Radio
+          </button>
+        </div>
+        <aside
+          class="interface-intro"
+          id="interface-intro"
+          aria-label="New interface options"
+          hidden
+        >
+          <div>
+            <span class="interface-intro-label">MAKE IT YOURS</span>
+            <strong>Same music. New mood.</strong>
+            <p id="interface-intro-description">
+              Try Studio or Tape Radio above. Switch anytime — your music keeps
+              playing.
+            </p>
+          </div>
+          <button type="button" id="dismiss-interface-intro">Got it</button>
+        </aside>
         <div class="on-air" id="on-air">
           <span class="dot"></span>
           <span id="on-air-text">OFF AIR</span>
@@ -53,6 +87,19 @@
       <div class="deck">
         <div class="platter-row">
           <div class="vinyl-holder">
+            <div class="cassette">
+              <div class="cassette-top" aria-hidden="true">
+                <span>JUKE / NUKE</span><span>SIDE A · C-90</span>
+              </div>
+              <div class="cassette-label"></div>
+              <div class="tape-window" aria-hidden="true">
+                <span class="tape-reel"></span><span class="tape-bridge"></span
+                ><span class="tape-reel"></span>
+              </div>
+              <div class="cassette-bottom" aria-hidden="true">
+                NORMAL POSITION / TYPE I <span>STEREO</span>
+              </div>
+            </div>
             <div class="platter" id="platter">
               <div class="label">
                 <img class="label-art" id="platter-art" alt="" />
@@ -90,14 +137,15 @@
           </div>
 
           <div class="np-info">
-            <div class="np-eyebrow" id="np-eyebrow">NOT SPINNING</div>
+            <div class="track-readout">
+              <div class="np-eyebrow" id="np-eyebrow">NOT SPINNING</div>
 
-            <div class="np-title" id="np-title">QUEUE IS EMPTY</div>
+              <div class="np-title" id="np-title">QUEUE IS EMPTY</div>
 
-            <div class="np-by" id="np-by">requested by someone</div>
+              <div class="np-by" id="np-by">requested by someone</div>
+            </div>
 
-            <div class="">
-              <!-- <div class="bars" id="bars" style="visibility: hidden"> -->
+            <div class="feedback-row">
               <div class="bars" id="bars">
                 <span></span>
                 <span></span>
@@ -137,14 +185,20 @@
             </svg>
           </span>
 
-          <input
-            type="range"
-            id="volume-slider"
-            aria-label="Volume"
-            min="0"
-            max="100"
-            value="80"
-          />
+          <div class="volume-dial">
+            <div class="volume-knob" aria-hidden="true"><span></span></div>
+            <input
+              type="range"
+              id="volume-slider"
+              aria-label="Volume"
+              min="0"
+              max="100"
+              value="80"
+            />
+          </div>
+          <span class="volume-knob-label" aria-hidden="true"
+            >VOLUME<small>TURN TO ADJUST</small></span
+          >
 
           <span class="volume-value" id="volume-value"> 80 </span>
         </div>
@@ -193,7 +247,7 @@
       </div>
 
       <!-- REQUEST -->
-      <div class="card">
+      <div class="card request-card">
         <div class="card-label">TRANSMIT A TRACK</div>
 
         <form id="add-form">
@@ -221,7 +275,7 @@
       </div>
 
       <!-- SETLIST -->
-      <div class="card">
+      <div class="card queue-card">
         <div class="card-label">SETLIST</div>
 
         <div id="queue-list">
@@ -230,18 +284,21 @@
       </div>
 
       <!-- END SESSION -->
-      <div class="card danger-card">
-        <div>
-          <div class="danger-title">END TRANSMISSION</div>
+      <details class="session-menu">
+        <summary>Session controls</summary>
+        <div class="card danger-card">
+          <div>
+            <div class="danger-title">END TRANSMISSION</div>
 
-          <p class="danger-description">
-            Shuts the JukeNuke server down for everyone. Restart it from the
-            player phone.
-          </p>
+            <p class="danger-description">
+              Shuts the JukeNuke server down for everyone. Restart it from the
+              player phone.
+            </p>
+          </div>
+
+          <button class="btn danger-btn" id="shutdown-btn">END</button>
         </div>
-
-        <button class="btn danger-btn" id="shutdown-btn">END</button>
-      </div>
+      </details>
 
       <!-- JOIN -->
       <!-- <div class="card join-card">
@@ -471,6 +528,7 @@
     <script src="js/volume.js"></script>
     <script src="js/pause.js"></script>
     <script src="js/reactions.js"></script>
+    <script src="js/title-scroll.js"></script>
     <script src="js/now-playing.js"></script>
     <script src="js/queue.js"></script>
     <script src="js/searching.js"></script>

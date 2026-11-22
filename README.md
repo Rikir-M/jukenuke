@@ -47,6 +47,16 @@ blocks `npm.ps1`.
 
 ## Working on it
 
+### Interfaces
+
+Use the three **Interface** keys in the header to switch between **Classic** (the
+original comic turntable), **Studio** (artwork and a clean layout), and
+**Tape Radio** (a cassette receiver with animated reels and a paper setlist).
+The selection is remembered in this browser. Switching keeps playback, the queue,
+and unfinished song requests intact. All interfaces use a centered, stacked layout on every screen; the new interfaces'
+shutdown action is inside **Session controls**. Cassette reels follow playback
+and respect reduced-motion preferences.
+
 | Command            | What it does                                                    |
 | ------------------ | --------------------------------------------------------------- |
 | `npm run dev`      | Server that restarts when you save a server file                |

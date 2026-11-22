@@ -26,7 +26,7 @@ function renderNowPlaying(data) {
         : status === "paused"
           ? "PAUSED"
           : "NOW SPINNING";
-    npTitle.textContent = data.current.title;
+    setScrollingTitle(npTitle, data.current.title);
 
     const durationKnown =
       typeof data.current.duration === "number" && data.current.duration > 0;
@@ -100,7 +100,10 @@ function renderNowPlaying(data) {
   } else {
     npEyebrow.textContent = "NOT SPINNING";
 
-    npTitle.textContent = data.queue.length ? "UP NEXT..." : "QUEUE IS EMPTY";
+    setScrollingTitle(
+      npTitle,
+      data.queue.length ? "UP NEXT..." : "QUEUE IS EMPTY",
+    );
 
     npBy.textContent = "";
 

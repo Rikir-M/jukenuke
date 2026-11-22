@@ -107,4 +107,16 @@ function lookup(input, { signal } = {}) {
   });
 }
 
-module.exports = { isYouTubeUrl, extractYouTubeId, lookup };
+const { createLookupPolicy } = require("./lookup-policy");
+
+module.exports = {
+  isYouTubeUrl,
+  extractYouTubeId,
+  lookup: createLookupPolicy(lookup, {
+    keyFor: (input) => {
+      const trimmed = input.trim();
+      const id = isYouTubeUrl(trimmed) && extractYouTubeId(trimmed);
+      return id ? `video:${id}` : `input:${trimmed}`;
+    },
+  }),
+};

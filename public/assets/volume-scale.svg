@@ -1,0 +1,19 @@
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  width="88"
+  height="88"
+  viewBox="0 0 88 88"
+>
+  <g fill="none" stroke="#b2b5a2" stroke-width="2" stroke-linecap="butt">
+    <path d="M44 1v6" transform="rotate(-135 44 44)" />
+    <path d="M44 1v6" transform="rotate(-105 44 44)" />
+    <path d="M44 1v6" transform="rotate(-75 44 44)" />
+    <path d="M44 1v6" transform="rotate(-45 44 44)" />
+    <path d="M44 1v6" transform="rotate(-15 44 44)" />
+    <path d="M44 1v6" transform="rotate(15 44 44)" />
+    <path d="M44 1v6" transform="rotate(45 44 44)" />
+    <path d="M44 1v6" transform="rotate(75 44 44)" />
+    <path d="M44 1v6" transform="rotate(105 44 44)" />
+    <path d="M44 1v6" transform="rotate(135 44 44)" />
+  </g>
+</svg>

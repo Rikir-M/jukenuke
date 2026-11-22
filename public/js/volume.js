@@ -4,6 +4,74 @@ let isAdjustingVolume = false;
 let volumeSendTimer = null;
 let volumeRequest = 0;
 let volumeController = null;
+let volumeDrag = null;
+
+function renderVolumeKnob() {
+  volumeSlider.parentElement.style.setProperty(
+    "--volume-fill",
+    `${volumeSlider.value}%`,
+  );
+  volumeSlider.parentElement.style.setProperty(
+    "--knob-angle",
+    `${Number(volumeSlider.value) * 2.7 - 135}deg`,
+  );
+}
+renderVolumeKnob();
+
+// Track angular movement without jumping when the knob is first grabbed.
+// The center has no useful angle, so ignore it rather than letting it jitter.
+function pointerAngle(event, center) {
+  const x = event.clientX - center.x;
+  const y = event.clientY - center.y;
+  return Math.hypot(x, y) < 8 ? null : (Math.atan2(x, -y) * 180) / Math.PI;
+}
+
+// Clockwise increases volume over a 270-degree sweep. Keep native keyboard controls.
+volumeSlider.addEventListener("pointerdown", (event) => {
+  if (document.documentElement.dataset.ui !== "tape" || event.button !== 0)
+    return;
+  if (volumeDrag) return;
+  event.preventDefault();
+  volumeSlider.focus();
+  const rect = volumeSlider.getBoundingClientRect();
+  const center = {
+    x: rect.left + rect.width / 2,
+    y: rect.top + rect.height / 2,
+  };
+  volumeDrag = {
+    id: event.pointerId,
+    center,
+    angle: pointerAngle(event, center),
+    value: Number(volumeSlider.value),
+  };
+  volumeSlider.setPointerCapture(event.pointerId);
+});
+volumeSlider.addEventListener("pointermove", (event) => {
+  if (!volumeDrag || event.pointerId !== volumeDrag.id) return;
+  const angle = pointerAngle(event, volumeDrag.center);
+  if (angle === null) {
+    volumeDrag.angle = null;
+    return;
+  }
+  if (volumeDrag.angle === null) {
+    volumeDrag.angle = angle;
+    return;
+  }
+  // Unwrap the -180/180 seam so crossing the bottom never flips the volume.
+  const delta = ((angle - volumeDrag.angle + 540) % 360) - 180;
+  volumeDrag.angle = angle;
+  volumeDrag.value = Math.max(0, Math.min(100, volumeDrag.value + delta / 2.7));
+  volumeSlider.value = Math.round(volumeDrag.value);
+  volumeSlider.dispatchEvent(new Event("input", { bubbles: true }));
+});
+for (const type of ["pointerup", "pointercancel", "lostpointercapture"]) {
+  volumeSlider.addEventListener(type, (event) => {
+    if (!volumeDrag || event.pointerId !== volumeDrag.id) return;
+    volumeDrag = null;
+    if (volumeSlider.hasPointerCapture(event.pointerId))
+      volumeSlider.releasePointerCapture(event.pointerId);
+  });
+}
 
 /* Volume Icon */
 
@@ -77,6 +145,7 @@ function updateVolumeIcon(v) {
 
 volumeSlider.addEventListener("input", () => {
   const v = volumeSlider.value;
+  renderVolumeKnob();
 
   volumeValue.textContent = v;
   updateVolumeIcon(v);
@@ -116,11 +185,13 @@ volumeSlider.addEventListener("input", () => {
 function syncVolume(data) {
   if (
     !isAdjustingVolume &&
+    !volumeDrag &&
     typeof data.volume === "number" &&
     Number(volumeSlider.value) !== data.volume
   ) {
     volumeSlider.value = data.volume;
     volumeValue.textContent = data.volume;
     updateVolumeIcon(data.volume);
+    renderVolumeKnob();
   }
 }
